@@ -1,10 +1,10 @@
-# LAB ONLY. Primary = minelab (5432); restore target = separate instance (5435).
+# LAB ONLY. Primary = minelab (5436); restore target = separate instance (5435).
 services:
   primary:
     image: postgres:16
     container_name: dbalab-primary
     env_file: ../.env
-    ports: ["${PG_PORT:-5432}:5432"]
+    ports: ["${PG_PORT:-5436}:5432"]
     command: ["postgres","-c","log_min_duration_statement=500","-c","log_connections=on","-c","log_lock_waits=on","-c","deadlock_timeout=1s","-c","shared_preload_libraries=pg_stat_statements"]
     volumes:
       - primary_data:/var/lib/postgresql/data

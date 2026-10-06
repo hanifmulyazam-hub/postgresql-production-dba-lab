@@ -7,7 +7,7 @@ A hands-on PostgreSQL administration lab built around a **synthetic** mining-fle
 ## Architecture
 ```mermaid
 flowchart LR
-  G[Synthetic data<br/>generate_series, 2M trips] --> P[(PostgreSQL 16 Primary<br/>minelab :5432)]
+  G[Synthetic data<br/>generate_series, 2M trips] --> P[(PostgreSQL 16 Primary<br/>minelab :5436)]
   P -- pg_dump -Fc --> B[/backups/*.dump + backup.log/]
   B -- pg_restore --> R[(Restore instance<br/>minelab_restored :5435)]
   S[Windows Task Scheduler<br/>daily 02:00] -. runs .-> B
@@ -22,6 +22,9 @@ docker compose -f docker/docker-compose.yml up -d primary     # first start seed
 docker exec dbalab-primary psql -U postgres -d minelab -c "\dt fleet.*"
 Get-Content sql/monitoring/01_health_views.sql | docker exec -i dbalab-primary psql -h localhost -U postgres -d minelab -f -
 ```
+Host ports: primary `5436`, replica `5434`, restore `5435` (chosen to avoid clashing with a local Postgres on 5432). Change them in `docker/docker-compose.yml`.
+Connect from a GUI: host `localhost`, user `postgres`, password from `.env`, database `minelab`.
+
 Reset everything: `docker compose -f docker/docker-compose.yml down -v`.
 
 ## What's covered
