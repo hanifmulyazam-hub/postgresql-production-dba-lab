@@ -1,0 +1,44 @@
+--- Session outputs ---
+BEGIN
+UPDATE 1
+ pg_sleep 
+----------
+ 
+(1 row)
+
+docker : ERROR:  deadlock detected
+    + CategoryInfo          : NotSpecified: (ERROR:  deadlock detected:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETAIL:  Process 988 waits for ShareLock on transaction 848; blocked by process 995.
+Process 995 waits for ShareLock on transaction 847; blocked by process 988.
+HINT:  See server log for query details.
+CONTEXT:  while updating tuple (0,2) in relation "truck"
+BEGIN
+UPDATE 1
+ pg_sleep 
+----------
+ 
+(1 row)
+
+UPDATE 1
+COMMIT
+--- DIAGNOSIS: server log ---
+
+> 2026-10-06 03:52:20.028 UTC [988] ERROR:  deadlock detected
+  2026-10-06 03:52:20.028 UTC [988] DETAIL:  Process 988 waits for ShareLock on transaction 848; blocked by process 
+995.
+  	Process 995 waits for ShareLock on transaction 847; blocked by process 988.
+  	Process 988: BEGIN; UPDATE fleet.truck SET status=status WHERE truck_id=1; SELECT pg_sleep(3); UPDATE fleet.truck 
+SET status=status WHERE truck_id=2; COMMIT;
+  	Process 995: BEGIN; UPDATE fleet.truck SET status=status WHERE truck_id=2; SELECT pg_sleep(3); UPDATE fleet.truck 
+SET status=status WHERE truck_id=1; COMMIT;
+  2026-10-06 03:52:20.028 UTC [988] HINT:  See server log for query details.
+  2026-10-06 03:52:20.028 UTC [988] CONTEXT:  while updating tuple (0,2) in relation "truck"
+ datname | deadlocks 
+---------+-----------
+ minelab |         1
+(1 row)
+
+
+

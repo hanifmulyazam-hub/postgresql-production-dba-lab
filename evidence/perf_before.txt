@@ -1,0 +1,143 @@
+=== Q1: trips of one truck in a 30-day window ===
+                                                                                    QUERY PLAN                                                                                    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Gather Merge  (cost=40257.65..40525.30 rows=2294 width=53) (actual time=40.362..43.554 rows=2778 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=10618 read=14072
+   ->  Sort  (cost=39257.62..39260.49 rows=1147 width=53) (actual time=38.524..38.583 rows=926 loops=3)
+         Sort Key: start_ts
+         Sort Method: quicksort  Memory: 108kB
+         Buffers: shared hit=10618 read=14072
+         Worker 0:  Sort Method: quicksort  Memory: 102kB
+         Worker 1:  Sort Method: quicksort  Memory: 102kB
+         ->  Parallel Seq Scan on haul_trip  (cost=0.00..39199.33 rows=1147 width=53) (actual time=0.025..38.244 rows=926 loops=3)
+               Filter: ((start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone) AND (truck_id = 17))
+               Rows Removed by Filter: 665741
+               Buffers: shared hit=10544 read=14072
+ Planning:
+   Buffers: shared hit=117
+ Planning Time: 0.296 ms
+ Execution Time: 43.701 ms
+(18 rows)
+
+                                                                                    QUERY PLAN                                                                                    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Gather Merge  (cost=40257.65..40525.30 rows=2294 width=53) (actual time=43.834..46.031 rows=2778 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=10714 read=13976 written=60
+   ->  Sort  (cost=39257.62..39260.49 rows=1147 width=53) (actual time=41.736..41.785 rows=926 loops=3)
+         Sort Key: start_ts
+         Sort Method: quicksort  Memory: 107kB
+         Buffers: shared hit=10714 read=13976 written=60
+         Worker 0:  Sort Method: quicksort  Memory: 102kB
+         Worker 1:  Sort Method: quicksort  Memory: 103kB
+         ->  Parallel Seq Scan on haul_trip  (cost=0.00..39199.33 rows=1147 width=53) (actual time=0.108..41.422 rows=926 loops=3)
+               Filter: ((start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone) AND (truck_id = 17))
+               Rows Removed by Filter: 665741
+               Buffers: shared hit=10640 read=13976 written=60
+ Planning Time: 0.058 ms
+ Execution Time: 46.155 ms
+(16 rows)
+
+=== Q2: per-route stats for one operator ===
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=36089.13..36096.08 rows=25 width=76) (actual time=39.261..41.492 rows=25 loops=1)
+   Group Key: route_id
+   Buffers: shared hit=10750 read=13880 written=96
+   ->  Gather Merge  (cost=36089.13..36094.96 rows=50 width=76) (actual time=39.228..41.440 rows=75 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=10750 read=13880 written=96
+         ->  Sort  (cost=35089.10..35089.16 rows=25 width=76) (actual time=37.196..37.198 rows=25 loops=3)
+               Sort Key: route_id
+               Sort Method: quicksort  Memory: 29kB
+               Buffers: shared hit=10750 read=13880 written=96
+               Worker 0:  Sort Method: quicksort  Memory: 29kB
+               Worker 1:  Sort Method: quicksort  Memory: 29kB
+               ->  Partial HashAggregate  (cost=35088.15..35088.52 rows=25 width=76) (actual time=37.150..37.158 rows=25 loops=3)
+                     Group Key: route_id
+                     Batches: 1  Memory Usage: 48kB
+                     Buffers: shared hit=10736 read=13880 written=96
+                     Worker 0:  Batches: 1  Memory Usage: 48kB
+                     Worker 1:  Batches: 1  Memory Usage: 48kB
+                     ->  Parallel Seq Scan on haul_trip  (cost=0.00..35032.67 rows=5548 width=15) (actual time=0.057..35.789 rows=4525 loops=3)
+                           Filter: (operator_id = 42)
+                           Rows Removed by Filter: 662142
+                           Buffers: shared hit=10736 read=13880 written=96
+ Planning:
+   Buffers: shared hit=29 read=5 written=5
+ Planning Time: 0.525 ms
+ Execution Time: 41.564 ms
+(27 rows)
+
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=36089.13..36096.08 rows=25 width=76) (actual time=37.242..39.886 rows=25 loops=1)
+   Group Key: route_id
+   Buffers: shared hit=10846 read=13784 written=96
+   ->  Gather Merge  (cost=36089.13..36094.96 rows=50 width=76) (actual time=37.228..39.838 rows=75 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=10846 read=13784 written=96
+         ->  Sort  (cost=35089.10..35089.16 rows=25 width=76) (actual time=35.274..35.276 rows=25 loops=3)
+               Sort Key: route_id
+               Sort Method: quicksort  Memory: 29kB
+               Buffers: shared hit=10846 read=13784 written=96
+               Worker 0:  Sort Method: quicksort  Memory: 29kB
+               Worker 1:  Sort Method: quicksort  Memory: 29kB
+               ->  Partial HashAggregate  (cost=35088.15..35088.52 rows=25 width=76) (actual time=35.237..35.248 rows=25 loops=3)
+                     Group Key: route_id
+                     Batches: 1  Memory Usage: 48kB
+                     Buffers: shared hit=10832 read=13784 written=96
+                     Worker 0:  Batches: 1  Memory Usage: 48kB
+                     Worker 1:  Batches: 1  Memory Usage: 48kB
+                     ->  Parallel Seq Scan on haul_trip  (cost=0.00..35032.67 rows=5548 width=15) (actual time=0.047..33.743 rows=4525 loops=3)
+                           Filter: (operator_id = 42)
+                           Rows Removed by Filter: 662142
+                           Buffers: shared hit=10832 read=13784 written=96
+ Planning Time: 0.070 ms
+ Execution Time: 39.919 ms
+(25 rows)
+
+=== Q3: trips on one day (function on column = index unusable) ===
+                                                               QUERY PLAN                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------
+ Finalize Aggregate  (cost=38126.63..38126.64 rows=1 width=8) (actual time=74.342..76.329 rows=1 loops=1)
+   Buffers: shared hit=10928 read=13688 written=95
+   ->  Gather  (cost=38126.42..38126.63 rows=2 width=8) (actual time=74.167..76.323 rows=3 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=10928 read=13688 written=95
+         ->  Partial Aggregate  (cost=37126.42..37126.43 rows=1 width=8) (actual time=72.281..72.282 rows=1 loops=3)
+               Buffers: shared hit=10928 read=13688 written=95
+               ->  Parallel Seq Scan on haul_trip  (cost=0.00..37116.00 rows=4167 width=0) (actual time=0.110..72.084 rows=1839 loops=3)
+                     Filter: ((start_ts)::date = '2026-03-15'::date)
+                     Rows Removed by Filter: 664828
+                     Buffers: shared hit=10928 read=13688 written=95
+ Planning:
+   Buffers: shared hit=6
+ Planning Time: 0.058 ms
+ Execution Time: 76.349 ms
+(16 rows)
+
+                                                               QUERY PLAN                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------
+ Finalize Aggregate  (cost=38126.63..38126.64 rows=1 width=8) (actual time=64.375..66.624 rows=1 loops=1)
+   Buffers: shared hit=11024 read=13592
+   ->  Gather  (cost=38126.42..38126.63 rows=2 width=8) (actual time=64.199..66.616 rows=3 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=11024 read=13592
+         ->  Partial Aggregate  (cost=37126.42..37126.43 rows=1 width=8) (actual time=62.708..62.708 rows=1 loops=3)
+               Buffers: shared hit=11024 read=13592
+               ->  Parallel Seq Scan on haul_trip  (cost=0.00..37116.00 rows=4167 width=0) (actual time=0.032..62.524 rows=1839 loops=3)
+                     Filter: ((start_ts)::date = '2026-03-15'::date)
+                     Rows Removed by Filter: 664828
+                     Buffers: shared hit=11024 read=13592
+ Planning Time: 0.067 ms
+ Execution Time: 66.648 ms
+(14 rows)
+

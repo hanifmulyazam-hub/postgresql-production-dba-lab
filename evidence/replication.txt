@@ -1,0 +1,27 @@
+--- Primary: pg_stat_replication ---
+ application_name |   state   | sync_state |  sent_lsn  | replay_lsn |   replay_lag    
+------------------+-----------+------------+------------+------------+-----------------
+ walreceiver      | streaming | async      | 0/32000060 | 0/32000060 | 00:00:00.022143
+(1 row)
+
+--- Primary: slot ---
+   slot_name   | active | restart_lsn 
+---------------+--------+-------------
+ replica1_slot | t      | 0/32000060
+(1 row)
+
+--- Replica: in recovery? (t = standby) and replay lag ---
+ standby | replay_delay 
+---------+--------------
+ t       | 
+(1 row)
+
+--- Propagation: write on primary, read on replica ---
+INSERT 0 1
+  action   | object_name 
+-----------+-------------
+ REPL_TEST | heartbeat
+(1 row)
+
+--- Write on replica must FAIL ---
+ERROR:  cannot execute INSERT in a read-only transaction

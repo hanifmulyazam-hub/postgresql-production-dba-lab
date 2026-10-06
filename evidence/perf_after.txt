@@ -1,0 +1,93 @@
+=== Q1: trips of one truck in a 30-day window ===
+                                                                                      QUERY PLAN                                                                                      
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=8214.91..8221.84 rows=2772 width=53) (actual time=12.242..12.454 rows=2778 loops=1)
+   Sort Key: start_ts
+   Sort Method: quicksort  Memory: 335kB
+   Buffers: shared hit=1152 read=1488 written=133
+   ->  Bitmap Heap Scan on haul_trip  (cost=79.77..8056.40 rows=2772 width=53) (actual time=0.684..11.632 rows=2778 loops=1)
+         Recheck Cond: ((truck_id = 17) AND (start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone))
+         Heap Blocks: exact=2623
+         Buffers: shared hit=1149 read=1488 written=133
+         ->  Bitmap Index Scan on idx_trip_truck_start  (cost=0.00..79.08 rows=2772 width=0) (actual time=0.443..0.443 rows=2778 loops=1)
+               Index Cond: ((truck_id = 17) AND (start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone))
+               Buffers: shared read=14
+ Planning:
+   Buffers: shared hit=179
+ Planning Time: 0.328 ms
+ Execution Time: 12.619 ms
+(15 rows)
+
+                                                                                      QUERY PLAN                                                                                      
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=8214.91..8221.84 rows=2772 width=53) (actual time=2.790..2.891 rows=2778 loops=1)
+   Sort Key: start_ts
+   Sort Method: quicksort  Memory: 335kB
+   Buffers: shared hit=2637
+   ->  Bitmap Heap Scan on haul_trip  (cost=79.77..8056.40 rows=2772 width=53) (actual time=0.463..2.420 rows=2778 loops=1)
+         Recheck Cond: ((truck_id = 17) AND (start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone))
+         Heap Blocks: exact=2623
+         Buffers: shared hit=2637
+         ->  Bitmap Index Scan on idx_trip_truck_start  (cost=0.00..79.08 rows=2772 width=0) (actual time=0.241..0.241 rows=2778 loops=1)
+               Index Cond: ((truck_id = 17) AND (start_ts >= '2026-03-01 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-31 00:00:00+00'::timestamp with time zone))
+               Buffers: shared hit=14
+ Planning Time: 0.077 ms
+ Execution Time: 3.003 ms
+(13 rows)
+
+=== Q2: per-route stats for one operator ===
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=628.89..629.26 rows=25 width=76) (actual time=3.684..3.692 rows=25 loops=1)
+   Group Key: route_id
+   Batches: 1  Memory Usage: 48kB
+   Buffers: shared hit=1 read=70 written=70
+   ->  Index Only Scan using idx_trip_operator_cov on haul_trip  (cost=0.43..496.36 rows=13253 width=15) (actual time=0.064..1.728 rows=13575 loops=1)
+         Index Cond: (operator_id = 42)
+         Heap Fetches: 0
+         Buffers: shared hit=1 read=70 written=70
+ Planning:
+   Buffers: shared hit=34
+ Planning Time: 0.103 ms
+ Execution Time: 3.717 ms
+(12 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=628.89..629.26 rows=25 width=76) (actual time=2.631..2.640 rows=25 loops=1)
+   Group Key: route_id
+   Batches: 1  Memory Usage: 48kB
+   Buffers: shared hit=71
+   ->  Index Only Scan using idx_trip_operator_cov on haul_trip  (cost=0.43..496.36 rows=13253 width=15) (actual time=0.010..0.945 rows=13575 loops=1)
+         Index Cond: (operator_id = 42)
+         Heap Fetches: 0
+         Buffers: shared hit=71
+ Planning Time: 0.062 ms
+ Execution Time: 2.658 ms
+(10 rows)
+
+=== Q3: trips on one day (function on column = index unusable) ===
+                                                                         QUERY PLAN                                                                         
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=170.97..170.98 rows=1 width=8) (actual time=0.594..0.595 rows=1 loops=1)
+   Buffers: shared hit=1 read=12 written=11
+   ->  Index Only Scan using idx_trip_start on haul_trip  (cost=0.43..156.47 rows=5802 width=0) (actual time=0.043..0.403 rows=5517 loops=1)
+         Index Cond: ((start_ts >= '2026-03-15 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-16 00:00:00+00'::timestamp with time zone))
+         Heap Fetches: 0
+         Buffers: shared hit=1 read=12 written=11
+ Planning Time: 0.053 ms
+ Execution Time: 0.610 ms
+(8 rows)
+
+                                                                         QUERY PLAN                                                                         
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=170.97..170.98 rows=1 width=8) (actual time=0.769..0.770 rows=1 loops=1)
+   Buffers: shared hit=13
+   ->  Index Only Scan using idx_trip_start on haul_trip  (cost=0.43..156.47 rows=5802 width=0) (actual time=0.019..0.486 rows=5517 loops=1)
+         Index Cond: ((start_ts >= '2026-03-15 00:00:00+00'::timestamp with time zone) AND (start_ts < '2026-03-16 00:00:00+00'::timestamp with time zone))
+         Heap Fetches: 0
+         Buffers: shared hit=13
+ Planning Time: 0.082 ms
+ Execution Time: 0.787 ms
+(8 rows)
+

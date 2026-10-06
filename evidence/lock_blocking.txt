@@ -1,0 +1,18 @@
+--- DIAGNOSIS: admin.v_blocking (session B waits on A) ---
+ blocked_pid | blocked_user |                        blocked_query                         |   blocked_for   | blocking_pid | blocking_user | blocking_state |                     blocking_last_query                      
+-------------+--------------+--------------------------------------------------------------+-----------------+--------------+---------------+----------------+--------------------------------------------------------------
+         927 | postgres     | SET application_name='session_B'; UPDATE fleet.truck SET sta | 00:00:03.936299 |          920 | postgres      | active         | BEGIN; UPDATE fleet.truck SET status=status WHERE truck_id=1
+(1 row)
+
+--- Lock waits ---
+ pid |   locktype    |   mode    | granted 
+-----+---------------+-----------+---------
+ 927 | transactionid | ShareLock | f
+(1 row)
+
+--- RESOLUTION: wait for A to COMMIT (or pg_terminate_backend(blocking_pid) as last resort) ---
+ still_blocked 
+---------------
+             0
+(1 row)
+
