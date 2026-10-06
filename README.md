@@ -9,7 +9,7 @@ A hands-on PostgreSQL administration lab built around a **synthetic** mining-fle
 flowchart LR
   G[Synthetic data<br/>generate_series, 2M trips] --> P[(PostgreSQL 16 Primary<br/>minelab :5432)]
   P -- pg_dump -Fc --> B[/backups/*.dump + backup.log/]
-  B -- pg_restore --> R[(Restore instance<br/>minelab_restored :5433)]
+  B -- pg_restore --> R[(Restore instance<br/>minelab_restored :5435)]
   S[Windows Task Scheduler<br/>daily 02:00] -. runs .-> B
   P -- WAL streaming --> RP[(Hot standby replica<br/>:5434, read-only)]
   M[admin.v_* monitoring views] --> P

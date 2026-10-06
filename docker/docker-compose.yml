@@ -1,4 +1,4 @@
-# LAB ONLY. Primary = minelab (5432); restore target = separate instance (5433).
+# LAB ONLY. Primary = minelab (5432); restore target = separate instance (5435).
 services:
   primary:
     image: postgres:16
@@ -19,7 +19,7 @@ services:
     image: postgres:16
     container_name: dbalab-restore
     env_file: ../.env
-    ports: ["${RESTORE_PG_PORT:-5433}:5432"]
+    ports: ["${RESTORE_PG_PORT:-5435}:5432"]
     volumes: [restore_data:/var/lib/postgresql/data]
   replica:
     image: postgres:16

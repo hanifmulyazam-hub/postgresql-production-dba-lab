@@ -6,7 +6,7 @@ Runs `pg_dump -Fc` (custom format) on `minelab`, saves `backups/minelab_<timesta
 
 ## 2. Restore (isolated target)
 `powershell -File scripts/restore/restore.ps1 [-File path]`
-Starts `dbalab-restore` (port 5433), recreates `minelab_restored`, runs `pg_restore --no-owner`.
+Starts `dbalab-restore` (port 5435), recreates `minelab_restored`, runs `pg_restore --no-owner`.
 Expect ~13 "errors ignored": GRANTs to roles that don't exist on the restore instance. Data is unaffected.
 
 ## 3. Validate
